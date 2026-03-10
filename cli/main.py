@@ -772,7 +772,7 @@ def update_research_team_status(status):
 
 
 # Ordered list of analysts for status transitions
-ANALYST_ORDER = ["market", "social", "news", "fundamentals"]
+ANALYST_ORDER = ["social", "news", "market", "fundamentals"]
 ANALYST_AGENT_NAMES = {
     "market": "Market Analyst",
     "social": "Social Analyst",
@@ -917,6 +917,12 @@ def run_analysis():
 
     # Normalize analyst selection to predefined order (selection is a 'set', order is fixed)
     selected_set = {analyst.value for analyst in selections["analysts"]}
+    
+    # Explode the forex selection into its constituent analysts so they run sequentially natively
+    if "forex" in selected_set:
+        selected_set.remove("forex")
+        selected_set.update(["social", "news", "market"])
+
     selected_analyst_keys = [a for a in ANALYST_ORDER if a in selected_set]
 
     # Initialize the graph with callbacks bound to LLMs

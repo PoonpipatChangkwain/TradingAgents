@@ -8,6 +8,7 @@ ANALYST_ORDER = [
     ("Social Media Analyst", AnalystType.SOCIAL),
     ("News Analyst", AnalystType.NEWS),
     ("Fundamentals Analyst", AnalystType.FUNDAMENTALS),
+    ("Trade Forex (Social -> News -> Market + Forex Data)", AnalystType.FOREX),
 ]
 
 

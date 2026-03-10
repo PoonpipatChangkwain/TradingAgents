@@ -24,6 +24,12 @@ You MUST utilize tools with the following intervals to perform your analysis: '1
 First, use '1h' to identify the macro trend. When calling tools for '1h', specify `look_back_days=30`.
 Then, use '15m' to pinpoint exact, optimal Entry prices. When calling tools for '15m', specify `look_back_days=5` to save processing time.
 
+CRITICAL CORRELATION RULE:
+If the ticker is `GOLD`, `XAUUSD`, or a major Forex pair (e.g., `EURUSD`), you MUST also query `get_stock_data` and `get_indicators` for:
+1. **DXY (US Dollar Index / DX-Y.NYB)**: Because GOLD and Forex pairs usually have a strong inverse correlation with the US Dollar.
+2. **US10Y (US 10-Year Treasury Yield / ^TNX)**: Because rising yields make non-yielding assets like GOLD less attractive.
+You must explicitly mention the state of DXY and US10Y in your final report and how they support or contradict your analysis on the primary ticker.
+
 You can select the **most relevant indicators** for a given market condition or trading strategy from the following list. The goal is to choose up to **8 indicators** that provide complementary insights without redundancy. Categories and each category's indicators are:
 
 Moving Averages:

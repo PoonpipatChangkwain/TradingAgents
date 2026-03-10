@@ -52,6 +52,16 @@ class GraphSetup:
         if len(selected_analysts) == 0:
             raise ValueError("Trading Agents Graph Setup Error: no analysts selected!")
 
+        # If 'forex' is selected, expand it to the required sequential pipeline
+        if "forex" in selected_analysts:
+            # We want Social -> News -> Market in exact order.
+            expanded_analysts = ["social", "news", "market"]
+            # Add any other analysts that were selected but aren't part of the forex core
+            for a in selected_analysts:
+                if a not in expanded_analysts and a != "forex":
+                    expanded_analysts.append(a)
+            selected_analysts = expanded_analysts
+
         # Create analyst nodes
         analyst_nodes = {}
         delete_nodes = {}

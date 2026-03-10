@@ -18,6 +18,9 @@ from tradingagents.agents.utils.news_data_tools import (
     get_insider_transactions,
     get_global_news
 )
+from tradingagents.agents.utils.forexfactory_tools import (
+    get_forex_factory_calendar
+)
 
 def create_msg_delete():
     def delete_messages(state):

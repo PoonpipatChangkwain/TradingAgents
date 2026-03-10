@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
-from tradingagents.agents.utils.agent_utils import get_news, get_global_news
+from tradingagents.agents.utils.agent_utils import get_news, get_global_news, get_forex_factory_calendar
 from tradingagents.dataflows.config import get_config
 
 
@@ -13,10 +13,13 @@ def create_news_analyst(llm):
         tools = [
             get_news,
             get_global_news,
+            get_forex_factory_calendar,
         ]
 
         system_message = (
-            "You are a news researcher tasked with analyzing recent news and trends over the past week. Please write a comprehensive report of the current state of the world that is relevant for trading and macroeconomics. Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, and get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
+            "You are a news researcher tasked with analyzing recent news and trends over the past week. Please write a comprehensive report of the current state of the world that is relevant for trading and macroeconomics. Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, and get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news.\n"
+            "If the ticker is a Forex pair (e.g. EURUSD) or a Commodity like GOLD/XAUUSD, you MUST use the get_forex_factory_calendar() tool to fetch major US Economic Calendar events for the week (e.g., NFP, CPI, Fed Rates) and analyze how these upcoming or recently released events will impact the USD and subsequently the target asset. "
+            "Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
         )
 
