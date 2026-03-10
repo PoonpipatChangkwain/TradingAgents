@@ -1,0 +1,1 @@
+I am unable to retrieve data for XAUUSD using the provided tools. The `get_stock_data` and `get_indicators` functions are designed for company stock ticker symbols (e.g., AAPL, TSM) and do not support forex pairs like XAUUSD. Therefore, I cannot perform the requested top-down analysis for intraday trading. Another assistant with access to forex data tools may be able to help.

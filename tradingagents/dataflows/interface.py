@@ -133,6 +133,16 @@ def get_vendor(category: str, method: str = None) -> str:
 
 def route_to_vendor(method: str, *args, **kwargs):
     """Route method calls to appropriate vendor implementation with fallback support."""
+    # Intercept and override for GOLD via MT5
+    if args and args[0] == "GOLD":
+        from .mt5_data import get_MT5_data, get_stock_stats_indicators_mt5
+        if method == "get_stock_data":
+            return get_MT5_data(*args, **kwargs)
+        elif method == "get_indicators":
+            return get_stock_stats_indicators_mt5(*args, **kwargs)
+        else:
+            return f"Method '{method}' is not supported for MT5 symbol GOLD. Fundamentals don't apply to Forex."
+
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)
     primary_vendors = [v.strip() for v in vendor_config.split(',')]

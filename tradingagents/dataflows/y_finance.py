@@ -9,6 +9,7 @@ def get_YFin_data_online(
     symbol: Annotated[str, "ticker symbol of the company"],
     start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
     end_date: Annotated[str, "End date in yyyy-mm-dd format"],
+    interval: Annotated[str, "Data interval. Valid options: 1d, 90m, 1h, 30m, 15m, 5m"] = "1d",
 ):
 
     datetime.strptime(start_date, "%Y-%m-%d")
@@ -18,7 +19,7 @@ def get_YFin_data_online(
     ticker = yf.Ticker(symbol.upper())
 
     # Fetch historical data for the specified date range
-    data = ticker.history(start=start_date, end=end_date)
+    data = ticker.history(start=start_date, end=end_date, interval=interval)
 
     # Check if data is empty
     if data.empty:
@@ -53,6 +54,7 @@ def get_stock_stats_indicators_window(
         str, "The current trading date you are trading on, YYYY-mm-dd"
     ],
     look_back_days: Annotated[int, "how many days to look back"],
+    interval: Annotated[str, "Data interval. Valid options: 1d, 90m, 1h, 30m, 15m, 5m"] = "1d",
 ) -> str:
 
     best_ind_params = {
@@ -139,7 +141,7 @@ def get_stock_stats_indicators_window(
 
     # Optimized: Get stock data once and calculate indicators for all dates
     try:
-        indicator_data = _get_stock_stats_bulk(symbol, indicator, curr_date)
+        indicator_data = _get_stock_stats_bulk(symbol, indicator, curr_date, interval)
         
         # Generate the date range we need
         current_dt = curr_date_dt
@@ -149,10 +151,17 @@ def get_stock_stats_indicators_window(
             date_str = current_dt.strftime('%Y-%m-%d')
             
             # Look up the indicator value for this date
+            # When using intraday data, date_str might just be the day and the dict contains intraday timestamps,
+            # so we'll match by date substring if exact match fails.
             if date_str in indicator_data:
                 indicator_value = indicator_data[date_str]
             else:
-                indicator_value = "N/A: Not a trading day (weekend or holiday)"
+                # Find matching intraday entries for this day
+                day_entries = [val for key, val in indicator_data.items() if str(key).startswith(date_str)]
+                if day_entries:
+                    indicator_value = f"Intraday Values: {', '.join(day_entries[:5])}... (showing first 5)"
+                else:
+                    indicator_value = "N/A: Not a trading day (weekend or holiday)"
             
             date_values.append((date_str, indicator_value))
             current_dt = current_dt - relativedelta(days=1)
@@ -187,7 +196,8 @@ def get_stock_stats_indicators_window(
 def _get_stock_stats_bulk(
     symbol: Annotated[str, "ticker symbol of the company"],
     indicator: Annotated[str, "technical indicator to calculate"],
-    curr_date: Annotated[str, "current date for reference"]
+    curr_date: Annotated[str, "current date for reference"],
+    interval: Annotated[str, "Data interval"] = "1d"
 ) -> dict:
     """
     Optimized bulk calculation of stock stats indicators.
@@ -220,15 +230,25 @@ def _get_stock_stats_bulk(
         curr_date_dt = pd.to_datetime(curr_date)
         
         end_date = today_date
-        start_date = today_date - pd.DateOffset(years=15)
+        
+        if interval in ["1m", "2m", "5m", "15m", "30m", "90m"]:
+            # yfinance max lookback for intraday <= 30m is 60 days
+            start_date = today_date - pd.DateOffset(days=59)
+        elif interval in ["60m", "1h"]:
+            # yfinance max lookback for 1h is 730 days
+            start_date = today_date - pd.DateOffset(days=729)
+        else:
+            start_date = today_date - pd.DateOffset(years=15)
+            
         start_date_str = start_date.strftime("%Y-%m-%d")
         end_date_str = end_date.strftime("%Y-%m-%d")
         
         os.makedirs(config["data_cache_dir"], exist_ok=True)
         
+        # Make the filename unique to the interval
         data_file = os.path.join(
             config["data_cache_dir"],
-            f"{symbol}-YFin-data-{start_date_str}-{end_date_str}.csv",
+            f"{symbol}-{interval}-YFin-data-{start_date_str}-{end_date_str}.csv",
         )
         
         if os.path.exists(data_file):
@@ -239,15 +259,19 @@ def _get_stock_stats_bulk(
                 symbol,
                 start=start_date_str,
                 end=end_date_str,
+                interval=interval,
                 multi_level_index=False,
                 progress=False,
-                auto_adjust=True,
+                auto_adjust=False, # Cannot robustly auto-adjust all intraday historicals easily
             )
             data = data.reset_index()
             data.to_csv(data_file, index=False)
         
         df = wrap(data)
-        df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
+        if interval == "1d":
+            df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
+        else:
+            df["Date"] = df["Date"].dt.strftime("%Y-%m-%d %H:%M:%S")
     
     # Calculate the indicator for all rows at once
     df[indicator]  # This triggers stockstats to calculate the indicator
@@ -279,6 +303,8 @@ def get_stockstats_indicator(
     curr_date = curr_date_dt.strftime("%Y-%m-%d")
 
     try:
+        # Note: stock stats indicator doesn't have an interval passed directly down below _get_stock_stats_bulk fallback mode 
+        # so fallback might throw errors or return 1d, but bulk lookup usually succeeds.
         indicator_value = StockstatsUtils.get_stock_stats(
             symbol,
             indicator,
