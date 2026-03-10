@@ -116,6 +116,38 @@ def get_category_for_method(method: str) -> str:
             return category
     raise ValueError(f"Method '{method}' not found in any category")
 
+def _is_forex_pair(symbol: str) -> bool:
+    """Check if the symbol is a Forex pair or commodity that should use MT5.
+    
+    Returns True for:
+    - Forex pairs: EURUSD, GBPUSD, USDJPY, AUDUSD, NZDUSD, etc.
+    - Commodities: GOLD, XAUUSD, SILVER, XAGUSD, etc.
+    """
+    symbol_upper = symbol.upper()
+    
+    # Direct commodities that map to MT5 symbols
+    if symbol_upper in ["GOLD", "XAUUSD", "SILVER", "XAGUSD", "OIL", "WTICUSD", "BRENTUSD"]:
+        return True
+    
+    # Forex pairs pattern: 6 characters, typically 
+    # (EUR, GBP, JPY, AUD, NZD, CAD, CHF, SGD, HKD, INR, CNY, MXN, ZAR, etc. + USD or other)
+    if len(symbol_upper) == 6:
+        forex_majors = [
+            "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "NZDUSD", "CADUD",  # USD pairs
+            "EURGBP", "EURJPY", "EURCAD", "EURCHF", "EURAUD",  # EUR pairs
+            "GBPJPY", "GBPCHF", "GBPAUD",  # GBP pairs
+            "CHFJPY", "USDCHF",  # JPY pairs
+            "AUDNZD", "AUDCAD",  # AUD pairs
+        ]
+        if symbol_upper in forex_majors:
+            return True
+    
+    # CRB commodity index
+    if symbol_upper in ["CRB", "GC=F", "SI=F", "CL=F", "BZ=F"]:
+        return True
+    
+    return False
+
 def get_vendor(category: str, method: str = None) -> str:
     """Get the configured vendor for a data category or specific tool method.
     Tool-level configuration takes precedence over category-level.
@@ -133,15 +165,15 @@ def get_vendor(category: str, method: str = None) -> str:
 
 def route_to_vendor(method: str, *args, **kwargs):
     """Route method calls to appropriate vendor implementation with fallback support."""
-    # Intercept and override for GOLD via MT5
-    if args and args[0] == "GOLD":
+    # Intercept and override for Forex pairs and commodities via MT5
+    if args and _is_forex_pair(args[0]):
         from .mt5_data import get_MT5_data, get_stock_stats_indicators_mt5
         if method == "get_stock_data":
             return get_MT5_data(*args, **kwargs)
         elif method == "get_indicators":
             return get_stock_stats_indicators_mt5(*args, **kwargs)
         else:
-            return f"Method '{method}' is not supported for MT5 symbol GOLD. Fundamentals don't apply to Forex."
+            return f"Method '{method}' is not supported for Forex/Commodity symbol {args[0]}. Fundamentals don't apply."
 
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)

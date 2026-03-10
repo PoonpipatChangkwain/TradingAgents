@@ -915,15 +915,18 @@ def run_analysis():
     # Create stats callback handler for tracking LLM/tool calls
     stats_handler = StatsCallbackHandler()
 
-    # Normalize analyst selection to predefined order (selection is a 'set', order is fixed)
-    selected_set = {analyst.value for analyst in selections["analysts"]}
+    # Normalize analyst selection to predefined order
+    selected_values = [analyst.value for analyst in selections["analysts"]]
     
-    # Explode the forex selection into its constituent analysts so they run sequentially natively
-    if "forex" in selected_set:
-        selected_set.remove("forex")
-        selected_set.update(["social", "news", "market"])
+    # Explode the forex selection into its constituent analysts while preserving order
+    if "forex" in selected_values:
+        selected_values.remove("forex")
+        # Add them strictly in this order if they aren't already there
+        for a in ["social", "news", "market"]:
+            if a not in selected_values:
+                selected_values.append(a)
 
-    selected_analyst_keys = [a for a in ANALYST_ORDER if a in selected_set]
+    selected_analyst_keys = [a for a in ANALYST_ORDER if a in selected_values]
 
     # Initialize the graph with callbacks bound to LLMs
     graph = TradingAgentsGraph(

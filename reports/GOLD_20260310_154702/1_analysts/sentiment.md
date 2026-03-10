@@ -1,0 +1,3 @@
+I apologize, but the `get_news` tool does not support fetching news for 'GOLD' as it appears to be configured for company stock tickers and not for commodities or forex. The tool returned the following error: "Method 'get_news' is not supported for MT5 symbol GOLD. Fundamentals don't apply to Forex."
+
+Therefore, I am unable to retrieve macroeconomic news, commodities market sentiment, inflation data, or central bank policy discussions that impact GOLD using the available tools. I cannot proceed with the analysis as requested.
