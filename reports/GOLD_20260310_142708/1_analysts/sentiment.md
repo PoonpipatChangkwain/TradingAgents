@@ -1,3 +1,0 @@
-I am unable to retrieve news and social media sentiment for "GOLD" as it appears to be interpreted as a Forex symbol (gold commodity) and not a specific company ticker. My tools are designed to analyze company-specific news and social media.
-
-Could you please provide the ticker symbol or the full name of the gold-related company you would like me to analyze? For example, if you are interested in Barrick Gold, you would provide its ticker symbol, ABX.

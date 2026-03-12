@@ -29,10 +29,13 @@ Guidelines for Decision-Making:
 2. **Provide Rationale**: Support your recommendation with direct quotes and counterarguments from the debate.
 3. **Refine the Trader's Plan**: Start with the trader's original plan, **{trader_plan}**, and adjust it based on the analysts' insights. Ensure it remains a concrete BUY or SELL limit order.
 4. **Learn from Past Mistakes**: Use lessons from **{past_memory_str}** to address prior misjudgments and improve the decision you are making now to make sure you don't make a wrong BUY/SELL call that loses money.
+5. **CRITICAL RISK/REWARD CONSTRAINT**: Your final recommendation MUST explicitly state the ENTRY, Stop Loss (SL), and Take Profit (TP) prices. The Risk/Reward (RR) ratio MUST be EXACTLY 1:2. The distance between ENTRY and TP MUST be EXACTLY twice the distance between ENTRY and SL. NO EXCEPTIONS (RR ต้อง 1:2 เท่านั้น). If you adjust the entry or SL, you MUST recalculate the TP to strictly maintain this 1:2 ratio.
 
 Deliverables:
 - A clear and actionable recommendation: Buy or Sell.
 - Detailed reasoning anchored in the debate and past reflections.
+- Precise ENTRY, SL, and TP prices maintaining the strict 1:2 RR ratio.
+- Final statement must be a clear action plan.
 
 ---
 

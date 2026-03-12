@@ -13,6 +13,7 @@ from tradingagents.llm_clients import create_llm_client
 from tradingagents.agents import *
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.agents.utils.memory import FinancialSituationMemory
+from tradingagents.agents.utils.history_tracker import HistoryTracker
 from tradingagents.agents.utils.agent_states import (
     AgentState,
     InvestDebateState,
@@ -105,6 +106,11 @@ class TradingAgentsGraph:
         # Create tool nodes
         self.tool_nodes = self._create_tool_nodes()
 
+        # Initialize History Tracker for recording and reviewing trading signals
+        self.history_tracker = HistoryTracker(
+            history_dir=self.config["project_dir"]
+        )
+
         # Initialize components
         self.conditional_logic = ConditionalLogic()
         self.graph_setup = GraphSetup(
@@ -117,6 +123,7 @@ class TradingAgentsGraph:
             self.invest_judge_memory,
             self.risk_manager_memory,
             self.conditional_logic,
+            self.history_tracker,
         )
 
         self.propagator = Propagator()
@@ -216,6 +223,16 @@ class TradingAgentsGraph:
 
         # Log state
         self._log_state(trade_date, final_state)
+
+        # Record signal to history
+        signal_text = final_state["final_trade_decision"]
+        full_explanation = final_state["trader_investment_plan"]
+        self.history_tracker.record_signal(
+            symbol=company_name,
+            signal_text=signal_text,
+            full_explanation=full_explanation,
+            balance="WAITING FOR INPUT",  # User fills this manually
+        )
 
         # Return decision and processed signal
         return final_state, self.process_signal(final_state["final_trade_decision"])

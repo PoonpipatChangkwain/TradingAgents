@@ -37,12 +37,23 @@ def get_YFin_data_online(
         if col in data.columns:
             data[col] = data[col].round(2)
 
+    def _get_tf_row_limit(interval_str):
+        if interval_str == "4h": return 90
+        elif interval_str in ["1h", "60m", "90m"]: return 100
+        elif interval_str == "30m": return 100
+        elif interval_str == "15m": return 96
+        elif interval_str == "5m": return 60
+        elif interval_str == "1m": return 60
+        else: return 120 # Fallback for 1d, 1wk etc.
+        
+    limit = _get_tf_row_limit(interval)
+    
     # Convert DataFrame to CSV string
-    csv_string = data.to_csv()
+    csv_string = data.tail(limit).to_csv()
 
     # Add header information
     header = f"# Stock data for {symbol.upper()} from {start_date} to {end_date}\n"
-    header += f"# Total records: {len(data)}\n"
+    header += f"# Showing last {limit} records (Total records: {len(data)})\n"
     header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
     return header + csv_string
@@ -130,10 +141,35 @@ def get_stock_stats_indicators_window(
         ),
     }
 
-    if indicator not in best_ind_params:
-        raise ValueError(
-            f"Indicator {indicator} is not supported. Please choose from: {list(best_ind_params.keys())}"
-        )
+    if isinstance(indicator, str) and "," in indicator:
+        indicators = [ind.strip() for ind in indicator.split(",")]
+    else:
+        indicators = [indicator]
+
+    for ind in indicators:
+        if ind not in best_ind_params:
+            raise ValueError(
+                f"Indicator {ind} is not supported. Please choose from: {list(best_ind_params.keys())}"
+            )
+
+    if len(indicators) > 1:
+        all_results = []
+        for ind in indicators:
+            result = get_stock_stats_indicators_window(
+                symbol=symbol,
+                indicator=ind,
+                curr_date=curr_date,
+                look_back_days=look_back_days,
+                interval=interval
+            )
+            all_results.append(result)
+        
+        combined = "## Multiple Indicators Analysis:\n\n"
+        for ind, result in zip(indicators, all_results):
+            combined += f"---\n{result}\n"
+        return combined
+
+    indicator = indicators[0]
 
     end_date = curr_date
     curr_date_dt = datetime.strptime(curr_date, "%Y-%m-%d")

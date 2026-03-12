@@ -1,3 +1,0 @@
-I am unable to retrieve specific news or sentiment data for "GOLD" as a commodity using the `get_news` tool, as it is designed for company-specific news and does not support commodities or macroeconomic indicators. The tool explicitly states: "Method 'get_news' is not supported for Forex/Commodity symbol GOLD. Fundamentals don't apply."
-
-Therefore, I cannot provide a comprehensive long report detailing analysis, insights, and implications for traders and investors on GOLD's current state based on social media, sentiment data, and recent news using the available tools.

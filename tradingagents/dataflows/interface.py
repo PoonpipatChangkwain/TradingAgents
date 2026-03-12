@@ -193,6 +193,10 @@ def route_to_vendor(method: str, *args, **kwargs):
         if vendor not in VENDOR_METHODS[method]:
             continue
 
+        # Strictly forbid using yfinance for Forex/Commodities, as pricing does not match MT5
+        if vendor == "yfinance" and args and _is_forex_pair(args[0]):
+            continue
+
         vendor_impl = VENDOR_METHODS[method][vendor]
         impl_func = vendor_impl[0] if isinstance(vendor_impl, list) else vendor_impl
 
@@ -200,5 +204,6 @@ def route_to_vendor(method: str, *args, **kwargs):
             return impl_func(*args, **kwargs)
         except AlphaVantageRateLimitError:
             continue  # Only rate limits trigger fallback
+            
 
     raise RuntimeError(f"No available vendor for '{method}'")

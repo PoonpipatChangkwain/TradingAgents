@@ -1,1 +1,0 @@
-I am unable to provide a comprehensive report on GOLD as I could not retrieve any relevant news or sentiment data using the available tools. The tool indicated that it does not support fundamental analysis for Forex instruments like GOLD, and subsequent attempts to find macroeconomic news using a relevant ticker (XAUUSD) yielded no results.

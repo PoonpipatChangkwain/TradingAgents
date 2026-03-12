@@ -1,0 +1,3 @@
+date,type_entry,symbol,entry_price,sl_price,tp_price,reason,result,balance,val
+12/3/2026 10:26,SELL LIMIT,GOLD (XAUUSD),5175,5182,5161,"SELL LIMIT based on institutional-grade technical weakness (below 50/200 SMA at 5183) and high real yields (1.73%). DXY strength (+65 pips) confirms structural trend. Phased execution: 50% immediate at 5175. Strict 1:2 RR (7 pts SL, 14 pts TP). Lessons applied: Respect institutional resistance, trade confirmed facts over forecasts, and avoid holding overbought assets at all-time highs.",SL,60,Valid until 07:00 UTC
+
